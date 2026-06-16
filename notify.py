@@ -1,4 +1,6 @@
 import requests
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from bs4 import BeautifulSoup
 import os
 import json
@@ -47,7 +49,7 @@ def fetch_notices():
             "Chrome/124.0.0.0 Safari/537.36"
         )
     }
-    resp = requests.get(URL, headers=headers, timeout=15)
+    resp = requests.get(URL, headers=headers, timeout=15, verify=False)
     resp.raise_for_status()
     resp.encoding = "utf-8"
 
