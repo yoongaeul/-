@@ -1,0 +1,40 @@
+name: 전남대 취업프로그램 공지 알림
+
+on:
+  schedule:
+    # 한국 시간 기준 (KST = UTC+9)
+    - cron: '30 1 * * *'   # 오전 10:30 KST  (01:30 UTC)
+    - cron: '0 5 * * *'    # 오후  2:00 KST  (05:00 UTC)
+    - cron: '0 10 * * *'   # 오후  7:00 KST  (10:00 UTC)
+  workflow_dispatch:        # 수동 실행 버튼 (테스트용)
+
+jobs:
+  check-notice:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Python 설치
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 패키지 설치
+        run: pip install requests beautifulsoup4
+
+      # 이전 실행에서 저장한 seen_ids.json 복원
+      - name: seen_ids 캐시 복원
+        uses: actions/cache@v4
+        with:
+          path: seen_ids.json
+          key: seen-ids-${{ github.run_id }}
+          restore-keys: |
+            seen-ids-
+
+      - name: 공지사항 확인 및 알림 전송
+        env:
+          TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python notify.py
